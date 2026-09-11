@@ -1,25 +1,96 @@
+# 💖 AmorCraft
 
-Installation information
-=======
+<p align="center">
+  <img src="https://img.shields.io/badge/Minecraft-1.21.1-brightgreen?style=for-the-badge&logo=minecraft" alt="Minecraft 1.21.1" />
+  <img src="https://img.shields.io/badge/NeoForge-21.1.250-orange?style=for-the-badge" alt="NeoForge" />
+  <img src="https://img.shields.io/badge/Java-21-red?style=for-the-badge&logo=openjdk" alt="Java 21" />
+  <img src="https://img.shields.io/badge/GeckoLib-4.9.2-blue?style=for-the-badge" alt="GeckoLib" />
+  <img src="https://img.shields.io/badge/Version-0.2.0-purple?style=for-the-badge" alt="Version 0.2.0" />
+</p>
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+> **AmorCraft** — это не просто мод на NPC-спутников. Это модульная симуляционная платформа персонажей для Minecraft, где компаньон является самостоятельной личностью с памятью, потребностями, собственным инвентарём, эмоциями и независимым восприятием каждого игрока.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+---
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+## 🌟 Главная концепция
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+Компаньон в AmorCraft — **не декоративный питомец** и **не жёстко заскриптованный манекен**, бездумно бегающий за игроком:
+- Он **самостоятельно оценивает своё состояние** и принимает решения (Brain & Goal architecture).
+- Он **не ждёт ручного кормления**: при чувстве голода он сам проверяет свои карманы и садится поесть.
+- Он **помнит каждого игрока персонально** (в мультиплеере у него разные отношения с каждым участником).
+- Его **личность бессмертна**: физическое тело может погибнуть, но мир помнит его душу, инвентарь и совершённые против него поступки.
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+---
+
+## 🚀 Текущий функционал (v0.2.0)
+
+### 🎭 Живая сущность и анимации (GeckoLib)
+- Серверная сущность гуманоидного типа (`CompanionEntity`), полностью интегрированная в мир Minecraft.
+- Плавные 3D-анимации на базе **GeckoLib**: дыхание/ожидание (`idle`) и адаптивная походка (`walk`).
+- Динамическая система моделей: модель, текстура и анимации разрешаются на лету по `characterId`, открывая путь к созданию новых персонажей без изменения исходного кода ядра.
+
+### 🍎 Потребности и автономный ИИ
+- **Комплекс потребностей (`CompanionData`)**: непрерывно рассчитываемый на сервере голод (*Hunger*), энергия (*Energy*) и настроение (*Mood*).
+- **Оптимизированный серверный тикрейт**: параметры обновляются раз в секунду, не нагружая процессор вычислениями каждый тик.
+- **Автономная цель питания (`CompanionEatFoodGoal`)**:
+  $$\text{Голод} < 70\% \longrightarrow \text{Поиск еды в рюкзаке} \longrightarrow \text{Остановка} \longrightarrow \text{Поедание с озвучкой} \longrightarrow \text{Сытость}$$
+
+### 🎒 Инвентарь и передача припасов
+- Собственный инвентарь компаньона на 8 слотов (`SimpleContainer`).
+- Передача предметов через `Shift + ПКМ`: игрок может делиться едой или инструментами, складывая их в рюкзак персонажа.
+- Полная сериализация содержимого инвентаря в NBT мира.
+
+### 🤝 Социальная система (Trust & Affection)
+- Раздельные шкалы взаимоотношений для каждого игрока:
+  - **Доверие (Trust)**: от `-100.0` (предатель) до `+100.0` (надёжный союзник);
+  - **Симпатия (Affection)**: от `-100.0` (вражда) до `+100.0` (эмоциональная близость).
+- **Реакция на заботу**: разделение еды повышает доверие и настроение (с удвоенным бонусом, если персонаж сильно голодал).
+- **Реакция на предательство**: удары по компаньону обрушивают показатели доверия и симпатии.
+
+### 🌌 Память мира и разделение «Тела» и «Души» (`CompanionSavedData`)
+- Личность персонажа хранится на уровне сохранения мира (`world/data/amorcraft_companions.dat`).
+- При гибели персонажа от руки игрока факт убийства фиксируется в долговременной памяти.
+- При повторном призыве или возрождении новое тело автоматически подтягивает профиль: персонаж **помнит своего убийцу**, сохраняет инвентарь и уровень отношений.
+
+---
+
+## 🛠 Отладочные инструменты (Debug Commands)
+
+Для удобства тестирования прямо в игре реализован набор команд (требуются права оператора):
+
+| Команда | Описание |
+|---|---|
+| `/amor companion info` | Выводит полный статус ближайшего компаньона (голод, энергия, настроение, слоты инвентаря, уровень доверия/симпатии к вам). |
+| `/amor companion sethunger <0-100>` | Мгновенно устанавливает уровень сытости компаньона (например, `30`, чтобы проверить авто-поедание). |
+| `/amor companion setenergy <0-100>` | Мгновенно устанавливает уровень энергии. |
+
+---
+
+## 🗺 Дорожная карта разработки
+
+- [x] **M0: Empty Core** — Чистый фундамент NeoForge 1.21.1 + GeckoLib
+- [x] **M1: Living Companion** — Регистрация сущности, модель, рендерер, базовые анимации
+- [x] **M2: Stateful Companion** — Потребности, инвентарь, социальные шкалы, память мира (`SavedData`)
+- [ ] **M3: Autonomous Companion** — Расширенный Brain, сон, отдых, следование, подбор предметов, дом
+- [ ] **M4: Social Companion** — Диалоговая система, память о событиях, черты характера (*Traits*)
+- [ ] **M5: Relationship Gameplay** — Дружба, романтическая линия, подарки, катсцены
+- [ ] **M6: Living World** — Генерация домов в деревнях, популяция мира, автономные профессии (фермер, рыбак)
+- [ ] **M7: Mod Integrations** — Опциональная поддержка *Farmer's Delight*, *Cobblemon*, *Create*
+- [ ] **M8: Platform & API** — Датапаки персонажей, Addon API для сторонних авторов
+
+---
+
+## 💻 Сборка и запуск из исходников
+
+### Требования:
+- **Java Development Kit (JDK) 21**
+- Git
+
+### Сборка проекта:
+```bash
+# Клонирование репозитория
+git clone https://github.com/<твой-аккаунт>/AmorCraft.git
+cd AmorCraft
+
+# Сборка мода
+./gradlew build
