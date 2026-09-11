@@ -57,6 +57,8 @@ public class AmorCommands {
                         "§fГолод: §a" + String.format("%.1f", companion.getCompanionData().getHunger()) + "/100\n" +
                         "§fЭнергия: §b" + String.format("%.1f", companion.getCompanionData().getEnergy()) + "/100\n" +
                         "§fНастроение: §d" + String.format("%.1f", companion.getCompanionData().getMood()) + "/100\n" +
+                        "§fДоверие к вам: §e" + String.format("%.1f", companion.getOrCreateRelationship(player.getUUID()).getTrust()) + " [-100..100]\n" +
+                        "§fСимпатия к вам: §d" + String.format("%.1f", companion.getOrCreateRelationship(player.getUUID()).getAffection()) + " [-100..100]\n" +
                         "§fПредметы в инвентаре: " + formatInventory(companion)
         ), false);
 
