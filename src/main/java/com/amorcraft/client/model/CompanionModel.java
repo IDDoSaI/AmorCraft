@@ -9,16 +9,19 @@ public class CompanionModel extends GeoModel<CompanionEntity> {
 
     @Override
     public ResourceLocation getModelResource(CompanionEntity animatable) {
-        return ResourceLocation.fromNamespaceAndPath(AmorCraft.MODID, "geo/entity/companion.geo.json");
+        String id = animatable.getCharacterId();
+        return ResourceLocation.fromNamespaceAndPath(AmorCraft.MODID, "geo/entity/" + id + ".geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(CompanionEntity animatable) {
-        return ResourceLocation.fromNamespaceAndPath(AmorCraft.MODID, "textures/entity/companion.png");
+        String id = animatable.getCharacterId();
+        return ResourceLocation.fromNamespaceAndPath(AmorCraft.MODID, "textures/entity/" + id + ".png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(CompanionEntity animatable) {
-        return ResourceLocation.fromNamespaceAndPath(AmorCraft.MODID, "animations/entity/companion.animation.json");
+        String id = animatable.getCharacterId();
+        return ResourceLocation.fromNamespaceAndPath(AmorCraft.MODID, "animations/entity/" + id + ".animation.json");
     }
 }
